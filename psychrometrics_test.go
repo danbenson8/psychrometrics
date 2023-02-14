@@ -145,3 +145,79 @@ func TestSatVapPres(t *testing.T) {
 		})
 
 }
+
+/************************************************************************************************
+	Test enthalpy at saturation
+	-----------------------------------------------------------------------------------------
+	The values are tested against the values published in Table 3 of ch. 1 of the 2017 ASHRAE Handbook - Fundamentals
+	Agreement is rarely better than 1%, and close to 3% at -5 C
+************************************************************************************************/
+
+func TestSatAirEnthalpy(t *testing.T) {
+	// Accurate to within 1%
+	opt := getCmpOptions(0.01)
+	type SatAirEnthalpyCase struct {
+		units    UnitSystem
+		TDryBulb float64
+		want     float64
+	}
+	cases_IP := []SatAirEnthalpyCase{
+		{IP, -58, -13.906},
+		{IP, -4, -0.286},
+		{IP, 23, 8.186},
+		{IP, 41, 15.699},
+		{IP, 77, 40.576},
+		{IP, 122, 126.066},
+		{IP, 185, 999.749},
+	}
+	cases_SI := []SatAirEnthalpyCase{
+		{SI, -50, -50222},
+		{SI, -20, -18542},
+		{SI, 5, 18639},
+		{SI, 25, 76504},
+		{SI, 50, 275353},
+		{SI, 85, 2307539},
+	}
+
+	SetUnitSystem(IP)
+	pressure := 14.696
+	for _, tt := range cases_IP {
+		t.Run(fmt.Sprintf("saturation enthalpy at %f°F, %fpsi is %fBtu lb⁻¹", tt.TDryBulb, pressure, tt.want),
+			func(t *testing.T) {
+				got := GetSatAirEnthalpy(tt.TDryBulb, pressure)
+				if !cmp.Equal(got, tt.want, opt) {
+					t.Fatalf("got %v, wanted %v", got, tt.want)
+				}
+			})
+	}
+
+	SetUnitSystem(SI)
+	pressure = 101325
+	for _, tt := range cases_SI {
+		t.Run(fmt.Sprintf("saturation enthalpy at %f°C, %fPa is %fJ kg⁻¹", tt.TDryBulb, pressure, tt.want),
+			func(t *testing.T) {
+				got := GetSatAirEnthalpy(tt.TDryBulb, pressure)
+				if !cmp.Equal(got, tt.want, opt) {
+					t.Fatalf("got %v, wanted %v", got, tt.want)
+				}
+			})
+	}
+
+	// Test -5°C separately
+	// Accurate to within 1%
+	opt = getCmpOptions(0.03)
+	tt := SatAirEnthalpyCase{
+		units:    SI,
+		TDryBulb: -5,
+		want:     1164,
+	}
+
+	t.Run(fmt.Sprintf("saturation enthalpy at %f°C, %fPa is %fJ kg⁻¹", tt.TDryBulb, pressure, tt.want),
+		func(t *testing.T) {
+			got := GetSatAirEnthalpy(tt.TDryBulb, pressure)
+			if !cmp.Equal(got, tt.want, opt) {
+				t.Fatalf("got %v, wanted %v", got, tt.want)
+			}
+		})
+
+}

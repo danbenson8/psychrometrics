@@ -587,7 +587,8 @@ func GetSatHumRatio(TDryBulb, Pressure float64) float64 {
 	return math.Max(SatHumRatio, MIN_HUM_RATIO)
 }
 
-// Return saturated air enthalpy given dry-bulb temperature and pressure.
+// Return saturated air enthalpy [Btu lb⁻¹/J kg⁻¹] given dry-bulb temperature [°F/°C]
+// and pressure [psi/Pa].
 // Reference: ASHRAE Handbook - Fundamentals (2017) ch. 1
 func GetSatAirEnthalpy(TDryBulb, Pressure float64) float64 {
 	return GetMoistAirEnthalpy(TDryBulb, GetSatHumRatio(TDryBulb, Pressure))
@@ -755,7 +756,7 @@ func CalcPsychrometricsFromTWetBulb(TDryBulb, TWetBulb, Pressure float64) (HumRa
 }
 
 // Utility function to calculate humidity ratio [lb_H₂O lb_Air⁻¹/kg_H₂O kg_Air⁻¹], wet-bulb temperature [°F/°C], relative humidity [0-1],
-// vapour pressure [psi/Pa], moist air enthalpy[Btu lb⁻¹/J kg⁻¹], moist air volume [ft³ lb⁻¹/m³ kg⁻¹], and degree of saturation [unitless] of air given
+// vapour pressure [psi/Pa], moist air enthalpy [Btu lb⁻¹/J kg⁻¹], moist air volume [ft³ lb⁻¹/m³ kg⁻¹], and degree of saturation [unitless] of air given
 // dry-bulb temperature [°F/°C], relative humidity [0-1] and pressure [psi/Pa].
 func CalcPsychrometricsFromTDewPoint(TDryBulb, TDewPoint, Pressure float64) (HumRatio, TWetBulb, RelHum, VapPres, MoistAirEnthalpy, MoistAirVolume, DegreeOfSaturation float64) {
 	Assert(TDewPoint <= TDryBulb, "Dew point temperature is above dry bulb temperature")
